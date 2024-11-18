@@ -59,18 +59,3 @@ def predict_life_expectancy(age=0, gender=Gender.BOTH, health_factors=None, year
     
     return final_prediction
 
-if __name__ == '__main__':
-    health = HealthFactors(
-        smoking=False,
-        obesity=False,
-        chronic_conditions=0,
-        physical_activity_level=2
-    )
-    
-    # Calculate life expectancy for different scenarios
-    age_35_male = predict_life_expectancy(60, Gender.MALE, health)
-    age_35_female = predict_life_expectancy(60, Gender.FEMALE, health)
-    
-    print(f"\nPredicted remaining life expectancy:")
-    print(f"60-year-old male: {age_35_male:.1f} years")
-    print(f"60-year-old female: {age_35_female:.1f} years")

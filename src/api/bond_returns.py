@@ -89,8 +89,3 @@ def predict_bond(time: Time, future_months=60, target_rate=None):
     return predictions, confidence_intervals, future_dates
 
 
-if __name__ == '__main__':
-    p, ci, fd = predict_bond(Time.SHORT)
-    print(p)
-    print(ci)
-    print(fd)

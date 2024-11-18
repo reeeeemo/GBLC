@@ -95,4 +95,3 @@ def predict_inflation(future_months=60, target_rate=2.0):
 
     return predictions, confidence_intervals, future_dates
     
-predictions, confidence_intervals, future_dates = predict_inflation(future_months=120)

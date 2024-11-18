@@ -31,11 +31,10 @@ def return_inflation():
         life = data.get('life')
         future_months = life * 12
         
-        predictions, confidence_intervals, _ = predict_inflation(future_months=future_months)
+        predictions, _, _ = predict_inflation(future_months=future_months)
         
         
-        return jsonify({"predictions": f"{predictions}", 
-                       "confidence": f"{confidence_intervals}"})
+        return jsonify({"predictions": predictions.tolist()})
     return jsonify({"message": ""})
 
 @app.route('/api/get_bond', methods=['GET', 'POST'])
@@ -46,13 +45,13 @@ def return_bond():
         life = data.get('life')
         future_months = life * 12
         
-        low_preds, low_confidence, _ = predict_bond(time=Time.SHORT, future_months=future_months)
-        med_preds, med_confidence, _ = predict_bond(time=Time.MED, future_months=future_months)
-        long_preds, long_confidence, _ = predict_bond(time=Time.LONG, future_months=future_months)
+        low_preds, _, short_dates = predict_bond(time=Time.SHORT, future_months=future_months)
+        med_preds, _, med_dates = predict_bond(time=Time.MED, future_months=future_months)
+        long_preds, _, long_dates = predict_bond(time=Time.LONG, future_months=future_months)
         
-        return jsonify({"low_predictions": f"{low_preds}", "low_confidence": f"{low_confidence}",
-                        "med_predictions": f"{med_preds}", "med_confidence": f"{med_confidence}",
-                        "long_predictions": f"{long_preds}", "long_confidence": f"{long_confidence}"})
+        return jsonify({"short_predictions": low_preds.tolist(), "short_dates": short_dates.tolist(),
+                        "med_predictions": med_preds.tolist(), "med_dates": med_dates.tolist(),
+                        "long_predictions": long_preds.tolist(), "long_dates": long_dates.tolist()})
     return jsonify({"message": ""})
 
 if __name__ == '__main__':

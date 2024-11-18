@@ -9,8 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "next": "latest"
+    "recharts": "^2.13.3"
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import BondPredictionChart from './prediction_chart'
 
 export default function Home() {
     const [message, setMessage] = useState('Loading...');
@@ -9,6 +10,10 @@ export default function Home() {
     const [init_invest, set_init_invest] = useState('')
     const [gender, set_gender] = useState('');
     const [loading, set_loading] = useState(false);
+    const [predictions, set_predictions] = useState(["", []]);
+    const [future_dates, set_future_dates] = useState(["", []]);
+    const [life, set_life] = useState(0);
+    const [inflation, set_inflation] = useState([])
 
     const baseUrl = process.env.NODE_ENV === 'development'
         ? 'http://localhost:5328' // local flask serv
@@ -38,7 +43,10 @@ export default function Home() {
                 })
             });
 
-            const life = await life_expec_response.json();
+            const life_json = await life_expec_response.json();
+
+            const life_value = parseInt(life_json.message)
+            set_life(life_value)
 
             const inflation_response = await fetch(`${baseUrl}/api/get_inflation`, {
                 method: 'POST',
@@ -46,11 +54,13 @@ export default function Home() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    life: parseInt(life.message)
+                    life: life_value
                 })
             })
 
             const inflation = await inflation_response.json();
+
+            set_inflation(inflation.predictions)
 
             const bond_response = await fetch(`${baseUrl}/api/get_bond`, {
                 method: 'POST',
@@ -58,13 +68,23 @@ export default function Home() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    life: parseInt(life.message)
+                    life: life_value
                 })
             })
 
             const bond = await bond_response.json();
 
-            setMessage(bond.low_predictions);
+            set_predictions([
+                ["short", bond.short_predictions],
+                ["med", bond.med_predictions],
+                ["long", bond.long_predictions]
+            ]);
+
+            set_future_dates([
+                ["short", bond.short_dates],
+                ["med", bond.med_dates],
+                ["long", bond.long_dates]
+            ])
 
         } catch (err) {
             setError('Error submitting data: ' + err.message);
@@ -113,7 +133,7 @@ export default function Home() {
                         </div>
                         <div className={styles.left}>
                             <label htmlFor="age" className={styles.label}>
-                                Age
+                            Age
                             </label>
                             <input
                                 id="age"
@@ -159,9 +179,10 @@ export default function Home() {
                     {error ? (
                         <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
                     ) : (
-                        <p style={{ textAlign: 'center' }}>{message}</p>
+                            <p style={{ textAlign: 'center' }}>{message}</p>
                     )}
                 </div>
+                <BondPredictionChart predictions={predictions} future_dates={future_dates} inflation={inflation} />
             </main>
         </div>
     );
