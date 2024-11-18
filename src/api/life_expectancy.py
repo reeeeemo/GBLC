@@ -1,8 +1,26 @@
+from codecs import ignore_errors
 import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
+# from sklearn.linear_model import LinearRegression
+# from sklearn.preprocessing import PolynomialFeatures
 from datetime import datetime
 from govcan_data_manager import Gender, get_life_expectancy_data, GOMPERTZ_MAX, HealthFactors
+
+def polynomial_features(X, degree=2):
+    X_poly = np.ones((X.shape[0], degree + 1))
+    for i in range(1, degree + 1):
+        X_poly[:, i] = X[:, 0] ** i
+    return X_poly
+
+def linear_regression(X, y, weights=None):
+    if weights is None:
+        weights = np.ones(len(y))
+        
+    W = np.diag(weights)
+    theta = np.linalg.inv(X.T.dot(W).dot(X)).dot(X.T).dot(W).dot(y)
+    return theta
+
+def predict_with_coeffs(X, coeffs):
+    return X.dot(coeffs)
 
 def predict_life_expectancy(age=0, gender=Gender.BOTH, health_factors=None, years_back=20):
     '''
@@ -27,16 +45,22 @@ def predict_life_expectancy(age=0, gender=Gender.BOTH, health_factors=None, year
             weights[i] = 0.05 # 5%
         
     # polynomial features
-    poly = PolynomialFeatures(degree=2)
-    X_poly = poly.fit_transform(X)
+    X_poly = polynomial_features(X, degree=2)
     
-    model = LinearRegression()
-    model.fit(X_poly, y, sample_weight=weights)
+    coeffs = linear_regression(X_poly, y, weights)
     
     # Make base prediction
     current_year = datetime.now().year
-    X_future = poly.transform(np.array([[current_year]]))
-    base_prediction = model.predict(X_future)[0]
+    X_future = polynomial_features(np.array([[current_year]]), degree=2)
+    base_prediction = predict_with_coeffs(X_future, coeffs=coeffs)[0]
+    
+    # SCIKIT IMPLEMENTATION
+    #poly = PolynomialFeatures(degree=2)
+    #X_poly = poly.fit_transform(X)
+    #model = LinearRegression()
+    #model.fit(X_poly, y, sample_weight=weights)
+    #X_future = poly.transform(np.array([[current_year]])) 
+    #base_prediction = model.predict(X_future)[0]
     
     # Adjust for age
     if age > 0:
