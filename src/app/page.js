@@ -11,7 +11,7 @@ export default function Home() {
     const [gender, set_gender] = useState('');
     const [loading, set_loading] = useState(false);
     const [predictions, set_predictions] = useState([]);
-    const [life, set_life] = useState(0);
+    const [best_route, set_best_route] = useState([(0, '')]);
 
     const baseUrl = process.env.NODE_ENV === 'development'
         ? 'http://localhost:5328' // local flask serv
@@ -45,7 +45,6 @@ export default function Home() {
             const life_json = await life_expec_response.json();
 
             const life_value = parseInt(life_json.message)
-            set_life(life_value)
 
             // Get Inflation + Bond Rate Of Return data
             const prediction_response = await fetch(`${baseUrl}/api/get_predictions`, {
@@ -73,11 +72,12 @@ export default function Home() {
                 pred_data.push(prediction);
             });
 
-            console.log(pred_data);
             set_predictions(pred_data);
 
             setMessage(`Total Return: $${parseFloat(predictions_json.final_amount).toFixed(2)}`)
-            
+
+            set_best_route(predictions_json.route);
+
         } catch (err) {
             setError('Error submitting data: ' + err.message);
         }
@@ -174,7 +174,7 @@ export default function Home() {
                             <p style={{ textAlign: 'center' }}>{message}</p>
                     )}
                 </div>
-                <BondPredictionChart predictions={predictions} />
+                <BondPredictionChart predictions={predictions} best_route={best_route} />
             </main>
         </div>
     );

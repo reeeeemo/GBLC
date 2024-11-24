@@ -210,7 +210,7 @@ def get_best_investment_route(predictions, invest):
             final_amount = total_value
             best_final_bond = bond_type
     
-    # reconstruct the route
+    # reconstruct the route back-front, then reverse
     best_route = []
     cur_bond = best_final_bond
     for year in range(years, 0, -1):

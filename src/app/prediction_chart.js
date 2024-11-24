@@ -2,10 +2,18 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import styles from './page.module.css';
 
-const BondPredictionChart = ({ predictions }) => {
-    if (!predictions || !predictions[0]) {
+const BondPredictionChart = ({ predictions, best_route }) => {
+    if (!predictions || !predictions[0]) { // if predictions aren't there, best_route won't be either
         return null;
     }
+
+    const bestRouteData = predictions.map(pred => {
+        const bestRoutePoint = best_route.find(point => point[0] == pred.year);
+        return {
+            year: pred.year,
+            value: bestRoutePoint ? pred[bestRoutePoint[1]] : null
+        };
+    });
 
     // Calculate min and max values for Y axis
     const allValues = predictions.flatMap(point => 
@@ -84,6 +92,7 @@ const BondPredictionChart = ({ predictions }) => {
                     stroke="#8884d8"
                     name="Short Term"
                     dot={false}
+                    strokeWidth={2}
                 />
                 <Line
                     type="monotone"
@@ -91,6 +100,7 @@ const BondPredictionChart = ({ predictions }) => {
                     stroke="#82ca9d"
                     name="Medium Term"
                     dot={false}
+                    strokeWidth={2}
                 />
                 <Line
                     type="monotone"
@@ -98,8 +108,18 @@ const BondPredictionChart = ({ predictions }) => {
                     stroke="#ffc658"
                     name="Long Term"
                     dot={false}
+                    strokeWidth={2}
                 />
-
+                <Line
+                    type="monotone"
+                    data={bestRouteData}
+                    dataKey="value"
+                    stroke="#ff0000"
+                    name="Your Return"
+                    dot={false}
+                    strokeWidth={1}
+                    connectNulls={true}
+                />
             </LineChart>
         </div>
     );
