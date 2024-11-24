@@ -10,10 +10,8 @@ export default function Home() {
     const [init_invest, set_init_invest] = useState('')
     const [gender, set_gender] = useState('');
     const [loading, set_loading] = useState(false);
-    const [predictions, set_predictions] = useState(["", []]);
-    const [future_dates, set_future_dates] = useState(["", []]);
+    const [predictions, set_predictions] = useState([]);
     const [life, set_life] = useState(0);
-    const [inflation, set_inflation] = useState([])
 
     const baseUrl = process.env.NODE_ENV === 'development'
         ? 'http://localhost:5328' // local flask serv
@@ -32,6 +30,7 @@ export default function Home() {
         setError(null);
 
         try {
+            // Get Life Expectancy data
             const life_expec_response = await fetch(`${baseUrl}/api/get_life_expec`, {
                 method: 'POST',
                 headers: {
@@ -48,44 +47,37 @@ export default function Home() {
             const life_value = parseInt(life_json.message)
             set_life(life_value)
 
-            const inflation_response = await fetch(`${baseUrl}/api/get_inflation`, {
+            // Get Inflation + Bond Rate Of Return data
+            const prediction_response = await fetch(`${baseUrl}/api/get_predictions`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                        'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    life: life_value
-                })
-            })
+                    age: life_value,
+                    init_invest: parseInt(init_invest),
+                }),
+            });
 
-            const inflation = await inflation_response.json();
+            const predictions_json = await prediction_response.json();
 
-            set_inflation(inflation.predictions)
+            const pred_data = []
 
-            const bond_response = await fetch(`${baseUrl}/api/get_bond`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    life: life_value
-                })
-            })
+            predictions_json.prediction_data.forEach(function (prediction, index) {
+                prediction.year = parseInt(prediction.year);
+                prediction.short = parseFloat(prediction.short);
+                prediction.med = parseFloat(prediction.med);
+                prediction.long = parseFloat(prediction.long);
+                prediction.inflation = parseFloat(prediction.inflation);
 
-            const bond = await bond_response.json();
+                pred_data.push(prediction);
+            });
 
-            set_predictions([
-                ["short", bond.short_predictions],
-                ["med", bond.med_predictions],
-                ["long", bond.long_predictions]
-            ]);
+            console.log(pred_data);
+            set_predictions(pred_data);
 
-            set_future_dates([
-                ["short", bond.short_dates],
-                ["med", bond.med_dates],
-                ["long", bond.long_dates]
-            ])
-
+            setMessage(`Total Return: $${parseFloat(predictions_json.final_amount).toFixed(2)}`)
+            
         } catch (err) {
             setError('Error submitting data: ' + err.message);
         }
@@ -182,7 +174,7 @@ export default function Home() {
                             <p style={{ textAlign: 'center' }}>{message}</p>
                     )}
                 </div>
-                <BondPredictionChart predictions={predictions} future_dates={future_dates} inflation={inflation} />
+                <BondPredictionChart predictions={predictions} />
             </main>
         </div>
     );

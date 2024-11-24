@@ -2,53 +2,20 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import styles from './page.module.css';
 
-const BondPredictionChart = ({ predictions, future_dates, inflation }) => {
-    if (!predictions || !predictions[0] || !predictions[0][1]) {
+const BondPredictionChart = ({ predictions }) => {
+    if (!predictions || !predictions[0]) {
         return null;
     }
 
-    const transform_data = () => {
-        const data_len = predictions[0][1].length;
-        const bondsPerYear = 12;
-        
-        const chartData = [];
-
-        for (let i = 0; i < data_len; i++) {
-            const yearPoint = i / bondsPerYear;
-
-            const inflation_rate = inflation && i < inflation.length ? inflation[i] : 0;
-
-            const short_real = predictions[0][1][i] - inflation_rate;
-            const med_real = predictions[1][1][i] - inflation_rate;
-            const long_real = predictions[2][1][i] - inflation_rate;
-
-            const dataPoint = {
-                year: yearPoint,
-                short: Number(predictions[0][1][i].toFixed(2)),
-                med: Number(predictions[1][1][i].toFixed(2)),
-                long: Number(predictions[2][1][i].toFixed(2)),
-                short_real: Number(short_real.toFixed(2)),
-                med_real: Number(med_real.toFixed(2)),
-                long_real: Number(long_real.toFixed(2)),
-                inflation: inflation && i < inflation.length ?
-                    Number(inflation[i].toFixed(2)) : null
-            };
-            chartData.push(dataPoint);
-        }
-        return chartData;
-    };
-
-    const chartData = transform_data();
-
     // Calculate min and max values for Y axis
-    const allValues = chartData.flatMap(point => 
-        [point.short, point.med, point.long, point.short_real, point.med_real, point.long_real, point.inflation]
+    const allValues = predictions.flatMap(point => 
+        [point.short, point.med, point.long, point.inflation]
             .filter(val => val !== null)
     );
     const minValue = Math.floor(Math.min(...allValues));
     const maxValue = Math.ceil(Math.max(...allValues));
 
-    const maxYear = Math.ceil(chartData[chartData.length - 1].year);
+    const maxYear = Math.ceil(predictions[predictions.length - 1].year);
 
     const formatXAxis = (value) => {
         if (Number.isInteger(value)) {
@@ -83,7 +50,7 @@ const BondPredictionChart = ({ predictions, future_dates, inflation }) => {
             <LineChart
                 width={600}
                 height={300}
-                data={chartData}
+                data={predictions}
                 margin={{
                     top: 5,
                     right: 30,
@@ -105,7 +72,7 @@ const BondPredictionChart = ({ predictions, future_dates, inflation }) => {
                     tickFormatter={(value) => `${value}%`}
                 />
                 <Tooltip
-                    formatter={(value) => [`${value}%`, 'Rate']}
+                    formatter={(value) => [`${value.toFixed(2)}%`, 'Rate']}
                     labelFormatter={formatTooltipLabel}
                 />
                 <Legend
@@ -113,21 +80,21 @@ const BondPredictionChart = ({ predictions, future_dates, inflation }) => {
                 />
                 <Line
                     type="monotone"
-                    dataKey="short_real"
+                    dataKey="short"
                     stroke="#8884d8"
                     name="Short Term"
                     dot={false}
                 />
                 <Line
                     type="monotone"
-                    dataKey="med_real"
+                    dataKey="med"
                     stroke="#82ca9d"
                     name="Medium Term"
                     dot={false}
                 />
                 <Line
                     type="monotone"
-                    dataKey="long_real"
+                    dataKey="long"
                     stroke="#ffc658"
                     name="Long Term"
                     dot={false}

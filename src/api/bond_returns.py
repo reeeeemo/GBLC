@@ -80,11 +80,6 @@ def predict_bond(time: Time, future_months=60, target_rate=None):
             predictions[i] + int_width
         ]
         
-    # Print summary statistics
-    print(f"\nSummary for {time.value.upper()} Time Profile:")
-    print(f"Current Rate: {cur_rate:.2f}%")
-    print(f"Target Rate: {target_rate:.2f}%")
-    print(f"Volatility: {volatility*100:.1f}%")
     
     return predictions, confidence_intervals, future_dates
 
