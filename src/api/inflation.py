@@ -28,7 +28,7 @@ def predict_inflation(future_months=60, target_rate=2.0):
     confidence_intervals = np.zeros((future_months, 2))
     
     # prediction params
-    convergence_period = 24 # 2 years to converge to target
+    convergence_period = 1 # 1 month to converge to target
     year_cycle = 12
     
     # Store current target rate
@@ -49,7 +49,7 @@ def predict_inflation(future_months=60, target_rate=2.0):
             base_prediction = cur_rate * weight + current_target * (1 - weight)
         else:
             # after convergence, use dynamic targets
-            if i % 24 == 0:
+            if i % 1 == 0:
                 current_target = current_target + np.random.normal(0, 0.2)
                 current_target = max(1.0, min(3.0, current_target)) # btwn 1-3%
                 
@@ -78,20 +78,5 @@ def predict_inflation(future_months=60, target_rate=2.0):
             min(4.0, predictions[i] + current_uncertainty)
         ]
         
-    # Print key predictions
-    print("\nKey Predictions:")
-    years = [2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033]
-    for year in years:
-        year_start_idx = (year - 2024) * 12
-        year_end_idx = year_start_idx + 11
-        if year_end_idx < len(predictions):  # Make sure we don't go out of bounds
-            year_avg = np.mean(predictions[year_start_idx:year_end_idx+1])
-            year_min = np.min(predictions[year_start_idx:year_end_idx+1])
-            year_max = np.max(predictions[year_start_idx:year_end_idx+1])
-            print(f"\n{year}:")
-            print(f"  Average: {year_avg:.2f}%")
-            print(f"  Range: {year_min:.2f}% - {year_max:.2f}%")
-            print(f"  Confidence: {np.mean(confidence_intervals[year_start_idx:year_end_idx+1], axis=0)}")
-
     return predictions, confidence_intervals, future_dates
     

@@ -74,7 +74,7 @@ export default function Home() {
 
             set_predictions(pred_data);
 
-            setMessage(`Total Return: $${parseFloat(predictions_json.final_amount).toFixed(2)}`)
+            setMessage(`Total (Inflation-Adjusted) Return: $${parseFloat(predictions_json.final_amount).toFixed(2)}`)
 
             set_best_route(predictions_json.route);
 
@@ -171,7 +171,7 @@ export default function Home() {
                     {error ? (
                         <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
                     ) : (
-                            <p style={{ textAlign: 'center' }}>{message}</p>
+                            <p style={{ textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>{message}</p>
                     )}
                 </div>
                 <BondPredictionChart predictions={predictions} best_route={best_route} />

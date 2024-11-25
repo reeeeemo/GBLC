@@ -17,12 +17,9 @@ def predict_bond(time: Time, future_months=60, target_rate=None):
     
     # If target rate was not specified
     if target_rate is None:
-        if time == Time.SHORT:
-            target_rate = 5.0 # conservative
-        elif time == Time.MED:
-            target_rate = 5.5 # balanced
-        else:
-            target_rate = 6.5
+        n_months = future_months // 2
+        recent_avg = (np.mean(vals_low[-n_months:]) + np.mean(vals_high[-n_months:])) / 2
+        target_rate = recent_avg
             
     cur_rate = (vals_low[-1] + vals_high[-1]) / 2
     
@@ -38,11 +35,11 @@ def predict_bond(time: Time, future_months=60, target_rate=None):
     predictions = np.zeros(future_months)
     confidence_intervals = np.zeros((future_months, 2))
     
-    convergence_period = 36 * int(days_per_month)
+    convergence_period = 1 * int(days_per_month)
     year_cycle = 12 * int(days_per_month)
     
     # Market seasonality params
-    seasonal_amp = 0.02 # 2%
+    seasonal_amp = 0.04 # 4%
     
     if time == Time.SHORT:
         volatility = 0.08

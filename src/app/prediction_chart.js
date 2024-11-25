@@ -92,7 +92,7 @@ const BondPredictionChart = ({ predictions, best_route }) => {
                     stroke="#8884d8"
                     name="Short Term"
                     dot={false}
-                    strokeWidth={2}
+                    strokeWidth={1}
                 />
                 <Line
                     type="monotone"
@@ -100,7 +100,7 @@ const BondPredictionChart = ({ predictions, best_route }) => {
                     stroke="#82ca9d"
                     name="Medium Term"
                     dot={false}
-                    strokeWidth={2}
+                    strokeWidth={1}
                 />
                 <Line
                     type="monotone"
@@ -108,7 +108,7 @@ const BondPredictionChart = ({ predictions, best_route }) => {
                     stroke="#ffc658"
                     name="Long Term"
                     dot={false}
-                    strokeWidth={2}
+                    strokeWidth={1}
                 />
                 <Line
                     type="monotone"
@@ -117,7 +117,7 @@ const BondPredictionChart = ({ predictions, best_route }) => {
                     stroke="#ff0000"
                     name="Your Return"
                     dot={false}
-                    strokeWidth={1}
+                    strokeWidth={0.5}
                     connectNulls={true}
                 />
             </LineChart>
