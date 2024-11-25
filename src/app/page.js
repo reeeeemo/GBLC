@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown'
 import styles from './page.module.css';
 import BondPredictionChart from './prediction_chart'
 
@@ -12,6 +13,7 @@ export default function Home() {
     const [loading, set_loading] = useState(false);
     const [predictions, set_predictions] = useState([]);
     const [best_route, set_best_route] = useState([(0, '')]);
+    const [readme, setReadme] = useState('');
 
     const baseUrl = process.env.NODE_ENV === 'development'
         ? 'http://localhost:5328' // local flask serv
@@ -22,6 +24,13 @@ export default function Home() {
             .then(response => response.json())
             .then(data => setMessage(data.message))
             .catch(err => setError('Error connecting to API: ' + err.message));
+    }, []);
+
+    useEffect(() => {
+        fetch('https://raw.githubusercontent.com/reeeeemo/GBLC/main/README.md')
+            .then(response => response.text())
+            .then(text => setReadme(text))
+            .catch(err => console.error('Error loading README:', err));
     }, []);
 
     const handleSubmit = async (e) => {
@@ -167,14 +176,27 @@ export default function Home() {
                         >
                             {loading ? 'Calculating...' : 'Calculate' }
                         </button>
+                        
                     </form>
                     {error ? (
                         <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
                     ) : (
                             <p style={{ textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>{message}</p>
                     )}
+                    <button
+                        onClick={() => window.location.reload()}
+                        style={{
+                            width: '20%',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '6px',
+                        }}>
+                        Reload Page
+                    </button>
                 </div>
                 <BondPredictionChart predictions={predictions} best_route={best_route} />
+                <div className={styles.calculator}>
+                    <ReactMarkdown>{readme}</ReactMarkdown>
+                </div>
             </main>
         </div>
     );
